@@ -1,90 +1,17 @@
 <template>
     <div class="table-wrapper">
-        <div class="resizer">
-            <ui5-table class="demo-table" id="table">
-                <!-- Columns -->
-                <ui5-table-column slot="columns" min-width="800">
-                    <span style="line-height: 1.4rem">Product</span>
+        <div class="table-container">
+            <ui5-table class="demo-table" ref="table">
+                <ui5-table-column v-for="col, i in columns" :key="`col_${i}`" :ref="`col_${i}`" slot="columns"
+                    :style="`width: ${col.width}px`">
+                    <span class="column-text">{{ col.header }}</span>
+                    <div class="resizer" draggable="true" @dragstart="dragstart($event, i)" @drag="drag($event)"
+                        @dragend="dragend" :style="resizerStyle" :class="[dragging.index === i ? 'dragging' : '']">
+                    </div>
                 </ui5-table-column>
-
-                <ui5-table-column slot="columns" min-width="800">
-                    <span style="line-height: 1.4rem">Supplier</span>
-                </ui5-table-column>
-
-                <ui5-table-column slot="columns" min-width="600" popin-text="Dimensions" demand-popin
-                    class="table-header-text-alignment">
-                    <span style="line-height: 1.4rem">Dimensions</span>
-                </ui5-table-column>
-
-                <ui5-table-column slot="columns" min-width="600" popin-text="Weight" demand-popin
-                    class="table-header-text-alignment">
-                    <span style="line-height: 1.4rem">Weight</span>
-                </ui5-table-column>
-
-                <ui5-table-column slot="columns" min-width="800" class="table-header-text-alignment">
-                    <span style="line-height: 1.4rem">Price</span>
-                </ui5-table-column>
-
-                <ui5-table-row>
-                    <ui5-table-cell>
-                        <div class="double-line-content">
-                            <span><b>Notebook Basic 15</b></span>
-                            <span style="margin-top: 0.5rem">HT-1000</span>
-                        </div>
-                    </ui5-table-cell>
-                    <ui5-table-cell>
-                        <span>Very Best Screens</span>
-                    </ui5-table-cell>
-                    <ui5-table-cell style="text-align: right">
-                        <span>30 x 18 x 3cm</span>
-                    </ui5-table-cell>
-                    <ui5-table-cell style="text-align: right">
-                        <span style="color: #2b7c2b"><b>4.2</b>KG</span>
-                    </ui5-table-cell>
-                    <ui5-table-cell style="text-align: right">
-                        <span><b>956</b>EUR</span>
-                    </ui5-table-cell>
-                </ui5-table-row>
-
-                <ui5-table-row>
-                    <ui5-table-cell>
-                        <div class="double-line-content">
-                            <span><b>Notebook Basic 175</b></span>
-                            <span style="margin-top: 0.5rem">HT-1001</span>
-                        </div>
-                    </ui5-table-cell>
-                    <ui5-table-cell>
-                        <span>Very Best Screens</span>
-                    </ui5-table-cell>
-                    <ui5-table-cell style="text-align: right">
-                        <span>29 x 17 x 3.1cm</span>
-                    </ui5-table-cell>
-                    <ui5-table-cell style="text-align: right">
-                        <span style="color: #2b7c2b"><b>4.5</b>KG</span>
-                    </ui5-table-cell>
-                    <ui5-table-cell style="text-align: right">
-                        <span><b>1249</b>EUR</span>
-                    </ui5-table-cell>
-                </ui5-table-row>
-
-                <ui5-table-row>
-                    <ui5-table-cell>
-                        <div class="double-line-content">
-                            <span><b>Notebook Basic 18</b></span>
-                            <span style="margin-top: 0.5rem">HT-1002</span>
-                        </div>
-                    </ui5-table-cell>
-                    <ui5-table-cell>
-                        <span>Very Best Screens</span>
-                    </ui5-table-cell>
-                    <ui5-table-cell style="text-align: right">
-                        <span>28 x 19 x 2.5cm</span>
-                    </ui5-table-cell>
-                    <ui5-table-cell style="text-align: right">
-                        <span style="color: #2b7c2b"><b>4.2</b>KG</span>
-                    </ui5-table-cell>
-                    <ui5-table-cell style="text-align: right">
-                        <span><b>1570</b>EUR</span>
+                <ui5-table-row v-for="val, i_val in values" :key="`row_${i_val}}`">
+                    <ui5-table-cell v-for="col, i_col in columns" :key="`row_${i_val}_${i_col}`">
+                        <span class="cell-text">{{ val[col.key] }}</span>
                     </ui5-table-cell>
                 </ui5-table-row>
             </ui5-table>
@@ -98,36 +25,111 @@ import "@ui5/webcomponents/dist/Table.js";
 import "@ui5/webcomponents/dist/TableColumn.js";
 import "@ui5/webcomponents/dist/TableRow.js";
 import "@ui5/webcomponents/dist/TableCell.js";
+
+export default {
+    data() {
+        return {
+            columns: [
+                { key: "product", header: "Product", width: 120, },
+                { key: "supplier", header: "Supplier", width: 120, },
+                { key: "dimensions", header: "Dimensions", width: 120, },
+                { key: "weight", header: "Weight", width: 120, },
+                { key: "price", header: "Price", width: 120, },
+            ],
+            values: [
+                { product: "Notebook Basic 15HT-1000", supplier: "Very Best Screens", dimensions: "30 x 18 x 3cm", weight: "4.2KG", price: "956EUR" },
+                { product: "Notebook Basic 175HT-1001", supplier: "Very Best Screens", dimensions: "29 x 17 x 3.1cm", weight: "4.5KG", price: "1249EUR" },
+                { product: "Notebook Basic 18HT-1002", supplier: "Very Best Screens", dimensions: "28 x 19 x 2.5cm", weight: "4.2KG", price: "1570EUR" }
+            ],
+            dragging: {},
+        }
+    },
+    mounted() {
+        // 初期表示の列幅を文字数に応じて調整する
+        this.columns.forEach((col, i) => {
+            const width = Math.max(...this.values.map(val => val[col.key].length)) * 10
+            this.columns[i].width = Math.max(this.columns[i].width, width)
+        })
+    },
+    computed: {
+        resizerStyle() {
+            const height = `calc(${(this.values.length + 1) * 100}%)`
+            return { height }
+        },
+    },
+    methods: {
+        dragstart(e, i) {
+            this.dragging.index = i
+            this.dragging.start = e.clientX
+            this.dragging.width = this.$refs[`col_${i}`][0].shadowRoot.childNodes[1].clientWidth
+            this.dragging.tableWidth = this.$refs['table'].clientWidth
+        },
+        drag(e) {
+            if (e.clientX) {
+                const dx = e.clientX - this.dragging.start
+                this.$refs['table'].style.width = `${this.dragging.tableWidth + dx}px`
+                this.$refs[`col_${this.dragging.index}`][0].shadowRoot.childNodes[1].style.width = `${this.dragging.width + dx}px`
+            }
+        },
+        dragend() {
+            this.dragging = {}
+        }
+    }
+}
 </script>
 
-<style>
+<style lang="scss" scoped>
 .table-wrapper {
     display: flex;
     align-items: center;
-    justify-content: center;
     margin: 2rem 0;
     box-sizing: border-box;
     background-color: var(--sapObjectHeader_Background);
 }
 
-.resizer {
-    min-width: 100%;
-    width: auto;
-    resize: horizontal;
+.table-container {
     overflow-x: auto;
 }
 
-.resizer::-webkit-resizer {
-    display: none;
-}
-
-.demo-table {
-    min-width: 50%;
-    width: auto;
-}
-
 ui5-table-column::part(column) {
-    overflow: hidden;
-    resize: horizontal;
+    position: relative;
+}
+
+column-text {
+    line-height: 1.4rem;
+}
+
+.resizer {
+    position: absolute;
+    width: 10px;
+    background-color: none;
+    right: 0;
+    top: 1px;
+    cursor: col-resize;
+    user-select: none;
+
+    &::after {
+        content: '';
+        display: block;
+        width: var(--ui5_table_header_row_border_width);
+        height: 100%;
+        background-color: var(--sapList_BorderColor);
+        position: relative;
+        margin: auto;
+
+
+    }
+
+    &:hover::after,
+    &.dragging::after {
+        width: var(--sapField_InformationBorderWidth);
+        background-color: var(--sapList_SelectionBorderColor);
+    }
+}
+
+ui5-table-cell {
+    max-width: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 </style>
