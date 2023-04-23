@@ -1,8 +1,15 @@
 <template>
-    <div class="table-wrapper">
+    <div class="wrapper selection-wrapper">
+        <ui5-list mode='MultiSelect' header-text="Column selection" @selection-change="selectionChange($event)">
+            <ui5-li v-for="col, i in columns" :key="`li_${i}`" :id="`li_${i}`" :selected="columns[i].active">
+                {{ col.header }}
+            </ui5-li>
+        </ui5-list>
+    </div>
+    <div class="wrapper">
         <div class="table-container">
             <ui5-table class="demo-table" ref="table">
-                <ui5-table-column v-for="col, i in columns" :key="`col_${i}`" :ref="`col_${i}`" slot="columns"
+                <ui5-table-column v-for="col, i in activeColumns" :key="`col_${i}`" :ref="`col_${i}`" slot="columns"
                     :style="`width: ${col.width}px`">
                     <span class="column-text">{{ col.header }}</span>
                     <div class="resizer" draggable="true" @dragstart="dragstart($event, i)" @drag="drag($event)"
@@ -10,7 +17,7 @@
                     </div>
                 </ui5-table-column>
                 <ui5-table-row v-for="val, i_val in values" :key="`row_${i_val}}`">
-                    <ui5-table-cell v-for="col, i_col in columns" :key="`row_${i_val}_${i_col}`">
+                    <ui5-table-cell v-for="col, i_col in activeColumns" :key="`row_${i_val}_${i_col}`">
                         <span class="cell-text">{{ val[col.key] }}</span>
                     </ui5-table-cell>
                 </ui5-table-row>
@@ -30,11 +37,11 @@ export default {
     data() {
         return {
             columns: [
-                { key: "product", header: "Product", width: 120, },
-                { key: "supplier", header: "Supplier", width: 120, },
-                { key: "dimensions", header: "Dimensions", width: 120, },
-                { key: "weight", header: "Weight", width: 120, },
-                { key: "price", header: "Price", width: 120, },
+                { key: "product", header: "Product", width: 120, active: true },
+                { key: "supplier", header: "Supplier", width: 120, active: true },
+                { key: "dimensions", header: "Dimensions", width: 120, active: true },
+                { key: "weight", header: "Weight", width: 120, active: true },
+                { key: "price", header: "Price", width: 120, active: true },
             ],
             values: [
                 { product: "Notebook Basic 15HT-1000", supplier: "Very Best Screens", dimensions: "30 x 18 x 3cm", weight: "4.2KG", price: "956EUR" },
@@ -56,8 +63,15 @@ export default {
             const height = `calc(${(this.values.length + 1) * 100}%)`
             return { height }
         },
+        activeColumns() {
+            return this.columns.filter(col => col.active)
+        }
     },
     methods: {
+        selectionChange(e) {
+            console.log(e.detail.targetItem.id, e.detail.targetItem._state.selected)
+            this.columns[e.detail.targetItem.id.match(/\d+/).pop()].active = e.detail.targetItem._state.selected
+        },
         dragstart(e, i) {
             this.dragging.index = i
             this.dragging.start = e.clientX
@@ -79,12 +93,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.table-wrapper {
+.wrapper {
     display: flex;
     align-items: center;
     margin: 2rem 0;
     box-sizing: border-box;
     background-color: var(--sapObjectHeader_Background);
+}
+
+.selection-wrapper {
+    width: 500px;
 }
 
 .table-container {
